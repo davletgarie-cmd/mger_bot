@@ -58,9 +58,6 @@ async def start(message: types.Message):
     markup.add("📝 Регистрация")
     await message.reply("👋 Добро пожаловать в МГЕР Оренбург!", reply_markup=markup)
 
-@dp.message_handler(lambda m: m.text == "/test")
-async def test_echo(message: types.Message):
-    await message.reply(f"Я вижу тебя, твой ID: {message.from_user.id}")
 
 @dp.message_handler(commands=['admin'])
 async def admin_command(message: types.Message):
@@ -251,4 +248,5 @@ async def finish_registration(message: types.Message, state: FSMContext):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
+
 
