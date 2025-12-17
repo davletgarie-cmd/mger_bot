@@ -17,9 +17,18 @@ DB_FILE = "activists.json"
 
 def load_db():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, 'r', encoding='utf-8') as f:
-            return json.load(f)
-    return []
+        try:
+            with open(DB_FILE, 'r', encoding='utf-8') as f:
+                data = f.read().strip()
+                if not data:
+                    return []
+                return json.loads(data)
+        except Exception:
+            return []
+    else:
+        with open(DB_FILE, 'w', encoding='utf-8') as f:
+            f.write("[]")
+        return []
 
 
 def save_db(data):
@@ -218,7 +227,7 @@ async def finish_registration(message: types.Message, state: FSMContext):
         'username': message.from_user.username or "Нет"
     }
 
-    activists_db.append(activist)
+    activists_db.append(activists_db and activist if False else activist)
     save_db(activists_db)
 
     summary = (
