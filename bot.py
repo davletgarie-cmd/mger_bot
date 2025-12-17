@@ -5,7 +5,7 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 import json
 import os
 
-TOKEN = "8440568995:AAHc6d37OwVDv8WHPzQQVoZxl07ctrWCr9g"  # твой токен
+TOKEN = "8440568995:AAHc6d37OwVDv8WHPzQQVoZxl07ctrWCr9g"  # токен бота
 ADMIN_ID = 1625411174  # твой Telegram ID
 
 bot = Bot(token=TOKEN)
@@ -59,6 +59,11 @@ async def start(message: types.Message):
     await message.reply("👋 Добро пожаловать в МГЕР Оренбург!", reply_markup=markup)
 
 
+@dp.message_handler(lambda m: m.text == "/test")
+async def test_echo(message: types.Message):
+    await message.reply(f"Я вижу тебя, твой ID: {message.from_user.id}")
+
+
 @dp.message_handler(commands=['admin'])
 async def admin_command(message: types.Message):
     if message.from_user.id != ADMIN_ID:
@@ -93,7 +98,7 @@ async def admin_view_start(message: types.Message, state: FSMContext):
 
 @dp.message_handler(state=AdminView.select_branch, lambda m: m.text.startswith("📋 "))
 async def select_branch(message: types.Message, state: FSMContext):
-    branch = message.text[3:]
+    branch = message.text[2:].strip()
     branch_activists = [a for a in activists_db if a['branch'] == branch]
 
     if not branch_activists:
@@ -190,15 +195,19 @@ async def process_photo(message: types.Message, state: FSMContext):
     await message.reply("5️⃣ Выберите первичное отделение:", reply_markup=markup)
 
 
-@dp.message_handler(state=Registration.branch, lambda message: message.text in [
+@dp.message_handler(state=Registration.branch, lambda m: m.text in [
     "🏭 ОАТК", "🏭 ОАК", "👨‍🎓 МГЮА", "🏭 ГТТ",
     "🏭 Гидропресс", "🏛️ ОГПУ", "❌ Внепервичные"
 ])
 async def process_branch_preset(message: types.Message, state: FSMContext):
     branch_map = {
-        "🏭 ОАТК": "ОАТК", "🏭 ОАК": "ОАК", "👨‍🎓 МГЮА": "МГЮА",
-        "🏭 ГТТ": "ГТТ", "🏭 Гидропресс": "Гидропресс", "🏛️ ОГПУ": "ОГПУ",
-        "❌ Внепервичные": "Внепервичные"
+        "🏭 ОАТК": "ОАТК",
+        "🏭 ОАК": "ОАК",
+        "👨‍🎓 МГЮА": "МГЮА",
+        "🏭 ГТТ": "ГТТ",
+        "🏭 Гидропресс": "Гидропресс",
+        "🏛️ ОГПУ": "ОГПУ",
+        "❌ Внепервичные": "Внепервичные",
     }
     await state.update_data(branch=branch_map[message.text])
     await finish_registration(message, state)
@@ -224,10 +233,10 @@ async def finish_registration(message: types.Message, state: FSMContext):
         'photo': data['photo'],
         'branch': data['branch'],
         'user_id': message.from_user.id,
-        'username': message.from_user.username or "Нет"
+        'username': message.from_user.username or "Нет",
     }
 
-    activists_db.append(activists_db and activist if False else activist)
+    activists_db.append(activist)
     save_db(activists_db)
 
     summary = (
@@ -248,5 +257,3 @@ async def finish_registration(message: types.Message, state: FSMContext):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
-
-
