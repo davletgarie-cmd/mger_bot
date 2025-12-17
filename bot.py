@@ -5,8 +5,8 @@ from aiogram.dispatcher.filters.state import State, StatesGroup
 import json
 import os
 
-TOKEN = "ТВОЙ_ТОКЕН_ИЗ_BOTFATHER"
-ADMIN_ID = 123456789  # ТВОЙ Telegram ID
+TOKEN = "8440568995:AAHc6d37OwVDv8WHPzQQVoZxl07ctrWCr9g"
+ADMIN_ID = 1625411174  # ТВОЙ Telegram ID
 
 bot = Bot(token=TOKEN)
 storage = MemoryStorage()
@@ -214,3 +214,4 @@ async def finish_registration(message: types.Message, state: FSMContext):
 
 if __name__ == '__main__':
     executor.start_polling(dp, skip_updates=True)
+
