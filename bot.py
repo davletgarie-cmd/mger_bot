@@ -12,12 +12,11 @@ bot = Bot(token=TOKEN)
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
-# Состояния регистрации
+# Состояния регистрации (без фото)
 class Registration(StatesGroup):
     name = State()
     birthdate = State()
     phone = State()
-    photo = State()
     branch = State()
 
 # Загрузка/сохранение данных
@@ -76,13 +75,6 @@ async def process_birthdate(message: types.Message, state: FSMContext):
 @dp.message_handler(state=Registration.phone)
 async def process_phone(message: types.Message, state: FSMContext):
     await state.update_data(phone=message.text)
-    await Registration.photo.set()
-    await message.reply("📸 Отправьте ваше фото:")
-
-@dp.message_handler(content_types=['photo'], state=Registration.photo)
-async def process_photo(message: types.Message, state: FSMContext):
-    photo = message.photo[-1]
-    await state.update_data(photo_id=photo.file_id)
     await Registration.branch.set()
     
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -99,9 +91,9 @@ async def finish_registration(message: types.Message, state: FSMContext):
     activists[str(user_id)]['branch'] = message.text
     save_data(activists)
     
-    # Уведомление админу
+    # Уведомление админу (текст вместо фото)
     summary = f"🆕 Новый активист:\n👤 {data['name']}\n📅 {data['birthdate']}\n📱 {data['phone']}\n🏢 {message.text}"
-    await bot.send_photo(ADMIN_ID, data['photo_id'], caption=summary)
+    await bot.send_message(ADMIN_ID, summary)
     
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add("👤 Мой профиль", "ℹ️ Помощь")
